@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>محامينا | Mohamena</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 32px 20px;
+      background: #F7FBFA;
+      color: #26352c;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      line-height: 1.8;
+    }
+    h1 { color: #047E3E; font-size: 26px; }
+    nav { text-align: end; }
+    a { color: #047E3E; }
+  </style>
+</head>
+<body>
+  <nav>
+    <a id="language-switch" href="?lang=en">English</a>
+  </nav>
+
+  <h1 id="heading">مرحبًا بك في محامينا</h1>
+  <p id="description">
+    اضغط على أيقونة المحادثة عند ظهورها لبدء التواصل.
+  </p>
+  <p id="load-error" role="alert" hidden>
+    تعذّر تحميل المحادثة. يرجى تحديث الصفحة والمحاولة مجددًا.
+  </p>
+
+  <script>
+    var language =
+      new URLSearchParams(window.location.search).get("lang") === "en"
+        ? "en"
+        : "ar";
+
+    document.documentElement.lang = language;
+    document.documentElement.dir = language === "ar" ? "rtl" : "ltr";
+
+    if (language === "en") {
+      document.getElementById("heading").textContent =
+        "Welcome to Mohamena";
+      document.getElementById("description").textContent =
+        "Tap the chat icon when it appears to start a conversation.";
+      document.getElementById("load-error").textContent =
+        "Unable to load the chat. Please refresh the page and try again.";
+      document.getElementById("language-switch").textContent = "العربية";
+      document.getElementById("language-switch").href = "?lang=ar";
+    }
+
+    window.__dc = window.__dc || {};
+    window.__dc.acid = 607629336;
+    window.__dc._v = "2.0";
+    window.__dc.locale = language;
+
+    (function () {
+      var script = document.createElement("script");
+      script.type = "text/javascript";
+      script.async = true;
+      script.src =
+        "https://www.drdsh.live/dc_tracking.js?t=" + Date.now();
+      script.onerror = function () {
+        document.getElementById("load-error").hidden = false;
+      };
+      document.body.appendChild(script);
+    })();
+  </script>
+</body>
+</html>
