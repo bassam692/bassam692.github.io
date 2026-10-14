@@ -63,22 +63,27 @@
       overflow-wrap: anywhere;
     }
 
-    /*
-      ينطبق على إطارات دردش ذات الرابط المباشر فقط.
-      محتوى الإطار الداخلي تتحكم به دردش.
-    */
-    @media (max-width: 600px) {
-      iframe[src*="drdsh.live"] {
-        max-width: calc(100vw - 24px) !important;
-        max-height: calc(100vh - 100px) !important;
-        max-height: calc(
-          100dvh - 100px - env(safe-area-inset-bottom, 0px)
-        ) !important;
-      }
-    }
-
     #load-error {
       color: #a32626;
+    }
+
+    /* إطار الدردشة يملأ المساحة داخل Web View */
+    .mohamena-chat-full {
+      position: fixed !important;
+      inset: 0 !important;
+      width: 100% !important;
+      height: 100vh !important;
+      height: 100dvh !important;
+      margin: 0 !important;
+    }
+
+    iframe[id^="drdshWidgetFrame"] {
+      width: 100% !important;
+      height: 100% !important;
+      max-width: none !important;
+      max-height: none !important;
+      border: 0 !important;
+      display: block !important;
     }
   </style>
 </head>
@@ -92,7 +97,7 @@
     <h1 id="heading">مرحبًا بك في محامينا</h1>
 
     <p id="description">
-      اضغط على أيقونة المحادثة عند ظهورها لبدء التواصل.
+      جارٍ تحميل المحادثة…
     </p>
 
     <p id="load-error" role="alert" hidden>
@@ -107,14 +112,15 @@
         : "ar";
 
     document.documentElement.lang = language;
-    document.documentElement.dir = language === "ar" ? "rtl" : "ltr";
+    document.documentElement.dir =
+      language === "ar" ? "rtl" : "ltr";
 
     if (language === "en") {
       document.getElementById("heading").textContent =
         "Welcome to Mohamena";
 
       document.getElementById("description").textContent =
-        "Tap the chat icon when it appears to start a conversation.";
+        "Loading chat…";
 
       document.getElementById("load-error").textContent =
         "Unable to load the chat. Please refresh the page and try again.";
@@ -122,22 +128,122 @@
       document.getElementById("language-switch").textContent =
         "العربية";
 
-      document.getElementById("language-switch").href = "?lang=ar";
+      document.getElementById("language-switch").href =
+        "?lang=ar";
     }
 
+    /* إعدادات دردش */
     window.__dc = window.__dc || {};
     window.__dc.acid = 607629336;
     window.__dc._v = "2.0";
     window.__dc.locale = language;
+    window.__dc.screen = "full";
+    window.__dc.autoOpen = true;
 
+    /* تنسيق المحتوى داخل إطار دردش */
+    function adjustMohamenaChat() {
+      document
+        .querySelectorAll('iframe[id^="drdshWidgetFrame"]')
+        .forEach(function (frame) {
+          if (frame.parentElement) {
+            frame.parentElement.classList.add(
+              "mohamena-chat-full"
+            );
+          }
+
+          try {
+            var doc = frame.contentDocument;
+
+            if (
+              !doc ||
+              !doc.head ||
+              doc.getElementById("mohamena-chat-style")
+            ) {
+              return;
+            }
+
+            var style = doc.createElement("style");
+            style.id = "mohamena-chat-style";
+
+            style.textContent = `
+              html, body {
+                width: 100% !important;
+                height: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                box-sizing: border-box;
+              }
+
+              #drdshStartChatBox {
+                inset: 0 !important;
+                width: 100% !important;
+                height: 100% !important;
+                min-height: 0 !important;
+                max-height: none !important;
+                border-radius: 0 !important;
+              }
+
+              button {
+                box-sizing: border-box !important;
+                max-width: 100% !important;
+                white-space: normal !important;
+                overflow-wrap: anywhere !important;
+                height: auto !important;
+                line-height: 1.6 !important;
+              }
+
+              .chatItem {
+                max-width: 100% !important;
+                overflow-wrap: anywhere !important;
+              }
+            `;
+
+            doc.head.appendChild(style);
+          } catch (error) {
+            console.warn(
+              "Unable to adjust chat frame:",
+              error
+            );
+          }
+        });
+    }
+
+    /* مراقبة إضافة إطار الدردشة وتحميله */
+    function watchMohamenaChat() {
+      document
+        .querySelectorAll('iframe[id^="drdshWidgetFrame"]')
+        .forEach(function (frame) {
+          if (!frame.dataset.mohamenaWatched) {
+            frame.dataset.mohamenaWatched = "true";
+            frame.addEventListener(
+              "load",
+              adjustMohamenaChat
+            );
+          }
+        });
+
+      adjustMohamenaChat();
+    }
+
+    new MutationObserver(watchMohamenaChat).observe(
+      document.body,
+      { childList: true, subtree: true }
+    );
+
+    window.addEventListener("load", watchMohamenaChat);
+    watchMohamenaChat();
+
+    /* تحميل سكربت دردش */
     (function () {
       var script = document.createElement("script");
       script.type = "text/javascript";
       script.async = true;
       script.src =
-        "https://www.drdsh.live/dc_tracking.js?t=" + Date.now();
+        "https://www.drdsh.live/dc_tracking.js?t=" +
+        Date.now();
 
       script.onerror = function () {
+        document.getElementById("description").hidden = true;
         document.getElementById("load-error").hidden = false;
       };
 
