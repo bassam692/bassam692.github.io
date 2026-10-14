@@ -2,35 +2,103 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover"
+  >
+
   <title>محامينا | Mohamena</title>
+
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      width: 100%;
+      min-height: 100%;
+      background: #F7FBFA;
+    }
+
     body {
+      width: 100%;
+      min-height: 100vh;
+      min-height: 100dvh;
       margin: 0;
-      padding: 32px 20px;
+      padding: 20px 16px;
       background: #F7FBFA;
       color: #26352c;
       font-family: Arial, sans-serif;
       text-align: center;
       line-height: 1.8;
     }
-    h1 { color: #047E3E; font-size: 26px; }
-    nav { text-align: end; }
-    a { color: #047E3E; }
+
+    main {
+      width: 100%;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    nav {
+      text-align: end;
+      margin-bottom: 24px;
+    }
+
+    a {
+      color: #047E3E;
+      font-size: 16px;
+    }
+
+    h1 {
+      margin: 0 0 16px;
+      color: #047E3E;
+      font-size: clamp(22px, 6vw, 28px);
+      line-height: 1.5;
+    }
+
+    p {
+      margin: 0 0 16px;
+      font-size: 16px;
+      overflow-wrap: anywhere;
+    }
+
+    /*
+      ينطبق على إطارات دردش ذات الرابط المباشر فقط.
+      محتوى الإطار الداخلي تتحكم به دردش.
+    */
+    @media (max-width: 600px) {
+      iframe[src*="drdsh.live"] {
+        max-width: calc(100vw - 24px) !important;
+        max-height: calc(100vh - 100px) !important;
+        max-height: calc(
+          100dvh - 100px - env(safe-area-inset-bottom, 0px)
+        ) !important;
+      }
+    }
+
+    #load-error {
+      color: #a32626;
+    }
   </style>
 </head>
-<body>
-  <nav>
-    <a id="language-switch" href="?lang=en">English</a>
-  </nav>
 
-  <h1 id="heading">مرحبًا بك في محامينا</h1>
-  <p id="description">
-    اضغط على أيقونة المحادثة عند ظهورها لبدء التواصل.
-  </p>
-  <p id="load-error" role="alert" hidden>
-    تعذّر تحميل المحادثة. يرجى تحديث الصفحة والمحاولة مجددًا.
-  </p>
+<body>
+  <main>
+    <nav>
+      <a id="language-switch" href="?lang=en">English</a>
+    </nav>
+
+    <h1 id="heading">مرحبًا بك في محامينا</h1>
+
+    <p id="description">
+      اضغط على أيقونة المحادثة عند ظهورها لبدء التواصل.
+    </p>
+
+    <p id="load-error" role="alert" hidden>
+      تعذّر تحميل المحادثة. يرجى تحديث الصفحة والمحاولة مجددًا.
+    </p>
+  </main>
 
   <script>
     var language =
@@ -44,11 +112,16 @@
     if (language === "en") {
       document.getElementById("heading").textContent =
         "Welcome to Mohamena";
+
       document.getElementById("description").textContent =
         "Tap the chat icon when it appears to start a conversation.";
+
       document.getElementById("load-error").textContent =
         "Unable to load the chat. Please refresh the page and try again.";
-      document.getElementById("language-switch").textContent = "العربية";
+
+      document.getElementById("language-switch").textContent =
+        "العربية";
+
       document.getElementById("language-switch").href = "?lang=ar";
     }
 
@@ -63,9 +136,11 @@
       script.async = true;
       script.src =
         "https://www.drdsh.live/dc_tracking.js?t=" + Date.now();
+
       script.onerror = function () {
         document.getElementById("load-error").hidden = false;
       };
+
       document.body.appendChild(script);
     })();
   </script>
